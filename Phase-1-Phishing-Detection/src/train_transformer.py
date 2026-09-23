@@ -8,12 +8,14 @@ It:
 - fine-tunes DistilBERT for binary classification
 - computes accuracy, precision, recall, F1, FPR, and FNR
 - saves validation metrics and the fine-tuned model
+- copies final artifacts to persistent Google Drive storage when available
 
 Expected training runtime: longer than 1 minute, commonly tens of minutes on a Colab GPU.
 """
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -41,6 +43,11 @@ VALIDATION_PATH = PROJECT_ROOT / "data" / "processed" / "validation.csv"
 
 RESULTS_DIR = PROJECT_ROOT / "results" / "transformer"
 MODEL_DIR = PROJECT_ROOT / "models" / "distilbert_phishing"
+
+DRIVE_ROOT = Path("/content/drive/MyDrive/Defensive-AI-Cybersecurity")
+DRIVE_ARTIFACT_DIR = DRIVE_ROOT / "transformer_artifacts"
+DRIVE_MODEL_DIR = DRIVE_ARTIFACT_DIR / "distilbert_phishing"
+DRIVE_RESULTS_DIR = DRIVE_ARTIFACT_DIR / "results"
 
 MODEL_NAME = "distilbert-base-uncased"
 MAX_LENGTH = 256
@@ -97,6 +104,27 @@ def compute_metrics(eval_pred):
         "false_positive_rate": fpr,
         "false_negative_rate": fnr,
     }
+
+
+def save_to_drive() -> None:
+    if not Path("/content/drive/MyDrive").exists():
+        print("Google Drive is not mounted. Persistent copy skipped.")
+        return
+
+    DRIVE_ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
+
+    if DRIVE_MODEL_DIR.exists():
+        shutil.rmtree(DRIVE_MODEL_DIR)
+    shutil.copytree(MODEL_DIR, DRIVE_MODEL_DIR)
+
+    DRIVE_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(
+        RESULTS_DIR / "validation_metrics.csv",
+        DRIVE_RESULTS_DIR / "validation_metrics.csv",
+    )
+
+    print(f"Persistent model copy saved to: {DRIVE_MODEL_DIR}")
+    print(f"Persistent metrics copy saved to: {DRIVE_RESULTS_DIR}")
 
 
 def main() -> None:
@@ -218,6 +246,7 @@ def main() -> None:
 
     print(f"\nSaved model to: {MODEL_DIR}")
     print(f"Saved validation metrics to: {RESULTS_DIR}")
+    save_to_drive()
     print("Test split was not read or modified.")
 
 
