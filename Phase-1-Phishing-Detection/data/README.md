@@ -40,7 +40,7 @@ The final test set should remain isolated from training and validation data. Dup
 
 Source-specific formatting should also be checked so the model does not learn dataset origin instead of phishing-related characteristics.
 
-## Step 6: Raw Dataset Acquisition
+## Raw Dataset Acquisition
 
 The selected dataset files are **not stored in the source GitHub repository**. The repository contains documentation only; the actual dataset is distributed through Zenodo under DOI `10.5281/zenodo.17314806`.
 
