@@ -67,8 +67,13 @@ def load_split(path: Path, name: str) -> pd.DataFrame:
 
 
 def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
+    predictions = eval_pred.predictions
+    labels = eval_pred.label_ids
+
+    if isinstance(predictions, tuple):
+        predictions = predictions[0]
+
+    predictions = np.argmax(predictions, axis=-1)
 
     accuracy = accuracy_score(labels, predictions)
     precision = precision_score(labels, predictions, zero_division=0)
@@ -161,7 +166,7 @@ def main() -> None:
         logging_steps=250,
         seed=SEED,
         fp16=True,
-        report_to="none",
+        report_to=[],
         save_total_limit=2,
     )
 
@@ -170,7 +175,7 @@ def main() -> None:
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=validation_dataset,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
     )
