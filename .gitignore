@@ -216,3 +216,5 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Raw research datasets (download with src/download_dataset.py)
+Phase-1-Phishing-Detection/data/raw/*.csv
