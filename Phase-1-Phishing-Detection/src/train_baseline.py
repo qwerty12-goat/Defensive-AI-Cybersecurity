@@ -1,4 +1,4 @@
-"""Step 10: Train the baseline phishing-email classifier.
+"""Train the baseline phishing-email classifier.
 
 Model:
     TF-IDF vectorizer + Logistic Regression
@@ -9,9 +9,9 @@ Inputs:
 
 Outputs:
     models/baseline_tfidf_logreg.joblib
-    results/step10_baseline/validation_metrics.csv
-    results/step10_baseline/confusion_matrix.csv
-    results/step10_baseline/confusion_matrix.png
+    results/baseline/validation_metrics.csv
+    results/baseline/confusion_matrix.csv
+    results/baseline/confusion_matrix.png
 
 Important:
     test.csv is intentionally not read in this step.
@@ -40,7 +40,7 @@ TRAIN_PATH = PROJECT_ROOT / "data" / "processed" / "train.csv"
 VALIDATION_PATH = PROJECT_ROOT / "data" / "processed" / "validation.csv"
 
 MODELS_DIR = PROJECT_ROOT / "models"
-RESULTS_DIR = PROJECT_ROOT / "results" / "step10_baseline"
+RESULTS_DIR = PROJECT_ROOT / "results" / "baseline"
 
 MODEL_PATH = MODELS_DIR / "baseline_tfidf_logreg.joblib"
 
@@ -193,7 +193,7 @@ def main() -> None:
 
     joblib.dump(pipeline, MODEL_PATH)
 
-    print("\n=== STEP 10 BASELINE VALIDATION RESULTS ===")
+    print("\n=== BASELINE VALIDATION RESULTS ===")
     print(f"Accuracy:            {accuracy:.4f}")
     print(f"Precision:           {precision:.4f}")
     print(f"Recall:              {recall:.4f}")
