@@ -1,0 +1,68 @@
+section,model,split_or_group,metric,value,numerator,denominator,notes
+historical,TF-IDF + Logistic Regression,validation,accuracy,0.9824,,,Development validation set
+historical,TF-IDF + Logistic Regression,validation,precision,0.9796,,,Development validation set
+historical,TF-IDF + Logistic Regression,validation,recall,0.9837,,,Development validation set
+historical,TF-IDF + Logistic Regression,validation,f1,0.9816,,,Development validation set
+historical,TF-IDF + Logistic Regression,validation,false_positive_rate,0.0187,,,Development validation set
+historical,TF-IDF + Logistic Regression,validation,false_negative_rate,0.0163,,,Development validation set
+historical,DistilBERT,validation,accuracy,0.9921,,,Development validation set
+historical,DistilBERT,validation,precision,0.9925,,,Development validation set
+historical,DistilBERT,validation,recall,0.9909,,,Development validation set
+historical,DistilBERT,validation,f1,0.9917,,,Development validation set
+historical,DistilBERT,validation,false_positive_rate,0.0068,,,Development validation set
+historical,DistilBERT,validation,false_negative_rate,0.0091,,,Development validation set
+historical,TF-IDF + Logistic Regression,final_test,accuracy,0.982482,,,One-shot consumed test set
+historical,TF-IDF + Logistic Regression,final_test,precision,0.978631,,,One-shot consumed test set
+historical,TF-IDF + Logistic Regression,final_test,recall,0.984747,,,One-shot consumed test set
+historical,TF-IDF + Logistic Regression,final_test,f1,0.981679,,,One-shot consumed test set
+historical,TF-IDF + Logistic Regression,final_test,false_positive_rate,0.019580,,,One-shot consumed test set
+historical,TF-IDF + Logistic Regression,final_test,false_negative_rate,0.015253,,,One-shot consumed test set
+historical,TF-IDF + Logistic Regression,final_test,true_negatives,16023,16023,31225,Confusion matrix count
+historical,TF-IDF + Logistic Regression,final_test,false_positives,320,320,31225,Confusion matrix count
+historical,TF-IDF + Logistic Regression,final_test,false_negatives,227,227,31225,Confusion matrix count
+historical,TF-IDF + Logistic Regression,final_test,true_positives,14655,14655,31225,Confusion matrix count
+historical,TF-IDF + Logistic Regression,final_test,total_errors,547,547,31225,Confusion matrix count
+historical,DistilBERT,final_test,accuracy,0.992314,,,One-shot consumed test set
+historical,DistilBERT,final_test,precision,0.992267,,,One-shot consumed test set
+historical,DistilBERT,final_test,recall,0.991601,,,One-shot consumed test set
+historical,DistilBERT,final_test,f1,0.991934,,,One-shot consumed test set
+historical,DistilBERT,final_test,false_positive_rate,0.007037,,,One-shot consumed test set
+historical,DistilBERT,final_test,false_negative_rate,0.008399,,,One-shot consumed test set
+historical,DistilBERT,final_test,true_negatives,16228,16228,31225,Confusion matrix count
+historical,DistilBERT,final_test,false_positives,115,115,31225,Confusion matrix count
+historical,DistilBERT,final_test,false_negatives,125,125,31225,Confusion matrix count
+historical,DistilBERT,final_test,true_positives,14757,14757,31225,Confusion matrix count
+historical,DistilBERT,final_test,total_errors,240,240,31225,Confusion matrix count
+synthetic,TF-IDF + Logistic Regression,overall,detection_rate,0.554,277,500,Positive-only controlled synthetic set
+synthetic,TF-IDF + Logistic Regression,overall,ci95_lower,0.510,,,Wilson interval
+synthetic,TF-IDF + Logistic Regression,overall,ci95_upper,0.597,,,Wilson interval
+synthetic,DistilBERT,overall,detection_rate,0.362,181,500,Positive-only controlled synthetic set
+synthetic,DistilBERT,overall,ci95_lower,0.321,,,Wilson interval
+synthetic,DistilBERT,overall,ci95_upper,0.405,,,Wilson interval
+synthetic,TF-IDF + Logistic Regression,account_security,detection_rate,0.99,99,100,Controlled synthetic category
+synthetic,DistilBERT,account_security,detection_rate,0.82,82,100,Controlled synthetic category
+synthetic,TF-IDF + Logistic Regression,delivery_service,detection_rate,0.55,55,100,Controlled synthetic category
+synthetic,DistilBERT,delivery_service,detection_rate,0.28,28,100,Controlled synthetic category
+synthetic,TF-IDF + Logistic Regression,general_social_engineering,detection_rate,0.20,20,100,Controlled synthetic category
+synthetic,DistilBERT,general_social_engineering,detection_rate,0.02,2,100,Controlled synthetic category
+synthetic,TF-IDF + Logistic Regression,promotional_offer,detection_rate,0.84,84,100,Controlled synthetic category
+synthetic,DistilBERT,promotional_offer,detection_rate,0.59,59,100,Controlled synthetic category
+synthetic,TF-IDF + Logistic Regression,workplace_business,detection_rate,0.19,19,100,Controlled synthetic category
+synthetic,DistilBERT,workplace_business,detection_rate,0.10,10,100,Controlled synthetic category
+synthetic,TF-IDF + Logistic Regression,copilot,detection_rate,0.528,132,250,Generator subgroup
+synthetic,DistilBERT,copilot,detection_rate,0.324,81,250,Generator subgroup
+synthetic,TF-IDF + Logistic Regression,gemini,detection_rate,0.580,145,250,Generator subgroup
+synthetic,DistilBERT,gemini,detection_rate,0.400,100,250,Generator subgroup
+synthetic_overlap,Both models,overall,both_detected,168,168,500,Paired predictions
+synthetic_overlap,Both models,overall,both_missed,210,210,500,Paired predictions
+synthetic_overlap,TF-IDF + Logistic Regression,overall,baseline_only_detected,109,109,500,Paired predictions
+synthetic_overlap,DistilBERT,overall,distilbert_only_detected,13,13,500,Paired predictions
+synthetic_confidence,TF-IDF + Logistic Regression,misses,high_confidence_misses,51,51,223,Confidence >= 0.90
+synthetic_confidence,TF-IDF + Logistic Regression,misses,high_confidence_miss_rate,0.229,51,223,Confidence >= 0.90
+synthetic_confidence,TF-IDF + Logistic Regression,misses,median_miss_confidence,0.7820,,,Raw model confidence; not calibrated
+synthetic_confidence,DistilBERT,misses,high_confidence_misses,290,290,319,Confidence >= 0.90
+synthetic_confidence,DistilBERT,misses,high_confidence_miss_rate,0.909,290,319,Confidence >= 0.90
+synthetic_confidence,DistilBERT,misses,median_miss_confidence,0.9992,,,Raw softmax confidence; not calibrated
+synthetic_statistics,Paired models,overall,mcnemar_baseline_only_correct,109,109,500,Exact paired comparison input
+synthetic_statistics,Paired models,overall,mcnemar_distilbert_only_correct,13,13,500,Exact paired comparison input
+synthetic_statistics,Paired models,overall,mcnemar_exact_two_sided_p,4.67819866022e-20,,,Set-specific exact McNemar test
