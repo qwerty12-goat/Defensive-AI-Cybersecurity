@@ -13,11 +13,11 @@ The project is organized around two complementary defensive layers:
 - **Human Layer:** detect phishing-class email content before a user interacts with it.
 - **Network Layer:** detect suspicious or automated malicious network behavior using machine-learning methods.
 
-The Human Layer is the current completed research component. The Network Layer is planned as the next major component.
+The Human Layer is the current research component and is in final repository polish. The Network Layer is planned as the next major component.
 
 ---
 
-## Human Layer: AI Phishing Detection
+## Human Layer: Phishing Detection Under Controlled Synthetic Distribution Shift
 
 ### Research Question
 
@@ -121,7 +121,7 @@ Increasing DistilBERT inference length from 256 to 512 tokens changed only **45 
 
 ---
 
-## Controlled AI-Generated Evaluation
+## Controlled Synthetic Evaluation
 
 A separate frozen evaluation set of **500 controlled synthetic phishing-class messages** was created before either model was evaluated on it.
 
@@ -271,7 +271,10 @@ Defensive-AI-Cybersecurity/
     ├── documentation/
     │   ├── transformer_colab.md
     │   ├── synthetic_evaluation_methodology.md
-    │   └── synthetic_evaluation_results.md
+    │   ├── synthetic_evaluation_results.md
+    │   ├── final_test_evaluation.md
+    │   ├── reproducibility_audit.md
+    │   └── human_layer_research_report.md
     ├── models/
     ├── notebooks/
     ├── results/
@@ -301,7 +304,7 @@ Important limitations include:
 
 - the historical dataset combines several older email corpora and a broad phishing-class definition;
 - corpus-specific language may influence model behavior;
-- the controlled synthetic set is not representative of every form of AI-generated phishing;
+- the controlled synthetic set is not representative of every form of real-world or AI-assisted phishing;
 - only two generation sources and five synthetic communication categories were evaluated;
 - the synthetic evaluation set contains only positive phishing-class examples;
 - strong validation performance did not guarantee out-of-distribution robustness;
@@ -320,7 +323,7 @@ The frozen synthetic evaluation set should not be reused for tuning without crea
 - Baseline model: complete
 - DistilBERT model: complete
 - Robustness analysis: complete
-- Controlled AI-generated evaluation: complete
+- Controlled synthetic evaluation: complete
 - Defensive demo: complete
 - Final held-out historical test evaluation: complete
 - Final report and repository polish: in progress
