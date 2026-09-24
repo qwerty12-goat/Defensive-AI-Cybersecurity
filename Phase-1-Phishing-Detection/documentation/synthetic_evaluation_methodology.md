@@ -1,8 +1,8 @@
-# Synthetic AI Phishing-Class Evaluation Methodology
+# Controlled Synthetic Phishing-Class Evaluation Methodology
 
 ## Purpose
 
-This evaluation tests whether phishing-detection models trained on a historical real-world email corpus remain effective on a controlled set of AI-generated phishing-class messages.
+This evaluation tests whether phishing-detection models trained on a historical email corpus remain effective on a controlled synthetic phishing-class distribution generated with AI assistance.
 
 The synthetic set is an out-of-distribution robustness evaluation. It is not training data, and its results are not used to retrain or tune the evaluated models.
 
@@ -17,7 +17,7 @@ Both models were trained before the synthetic evaluation. The traditional valida
 
 The synthetic evaluation addresses the secondary research question:
 
-> Are AI-generated phishing emails more difficult for machine-learning models to detect than traditional phishing emails?
+> How does detection performance on controlled synthetic phishing-class messages compare with performance on held-out historical phishing-class emails?
 
 Results should be interpreted only within the scope of this controlled experiment. The synthetic messages are not assumed to represent every real-world AI-assisted phishing attack.
 
