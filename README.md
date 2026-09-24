@@ -13,7 +13,20 @@ The project is organized around two complementary defensive layers:
 - **Human Layer:** detect phishing-class email content before a user interacts with it.
 - **Network Layer:** detect suspicious or automated malicious network behavior using machine-learning methods.
 
-The Human Layer is the current research component and is in final repository polish. The Network Layer is planned as the next major component.
+The project begins with a Human Layer study of phishing-email classification and robustness under controlled synthetic distribution shift. A Network Layer extension will investigate machine-learning detection of suspicious or automated network behavior.
+
+---
+
+## Quick Navigation
+
+- [Full Human Layer research report](Phase-1-Phishing-Detection/documentation/human_layer_research_report.md)
+- [Final held-out test evaluation](Phase-1-Phishing-Detection/documentation/final_test_evaluation.md)
+- [Controlled synthetic evaluation methodology](Phase-1-Phishing-Detection/documentation/synthetic_evaluation_methodology.md)
+- [Controlled synthetic evaluation results](Phase-1-Phishing-Detection/documentation/synthetic_evaluation_results.md)
+- [Reproducibility audit](Phase-1-Phishing-Detection/documentation/reproducibility_audit.md)
+- [Aggregate results](Phase-1-Phishing-Detection/results/results_summary.csv)
+- [Publication figures](Phase-1-Phishing-Detection/results/figures/)
+- [Defensive demo](Phase-1-Phishing-Detection/demo/)
 
 ---
 
@@ -221,9 +234,7 @@ Demo documentation:
 
 `Phase-1-Phishing-Detection/demo/README.md`
 
-The trained model is hosted on Hugging Face:
-
-https://huggingface.co/ozuvadh/defensive-ai-phishing-distilbert
+The trained model is hosted on [Hugging Face](https://huggingface.co/ozuvadh/defensive-ai-phishing-distilbert).
 
 The demo loads the model directly from Hugging Face rather than relying on a researcher-specific local path.
 
@@ -313,7 +324,6 @@ Important limitations include:
 The frozen synthetic evaluation set should not be reused for tuning without creating a new independent holdout for final evaluation.
 
 ---
-
 
 ## Core Finding
 
