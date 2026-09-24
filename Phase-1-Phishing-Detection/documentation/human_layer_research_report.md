@@ -754,31 +754,41 @@ The strongest high-confidence failures occurred in general social-engineering an
 
 ## 17. Discussion
 
-The most important result is the contrast between in-distribution historical generalization and out-of-distribution synthetic performance.
+The results separate two questions that can otherwise be conflated: whether a classifier generalizes to unseen examples from the historical data distribution, and whether it remains reliable after a substantial change in writing distribution.
 
-On historical validation data, DistilBERT clearly outperformed the TF-IDF + Logistic Regression baseline. It achieved higher accuracy, higher recall, higher F1, and a substantially lower false-positive rate. Crucially, this ordering and the absolute performance levels were independently reproduced on the untouched 31,225-email historical test set. The baseline reached 98.25% test accuracy and 98.47% recall, while DistilBERT reached 99.23% test accuracy and 99.16% recall.
+### 17.1 Same-Distribution Generalization
 
-The close validation-to-test agreement makes the later synthetic result more informative. The synthetic decline cannot be explained simply by either model failing to generalize to unseen examples. Both models generalized strongly to unseen examples from the historical distribution before degrading on the controlled synthetic distribution.
+Both frozen classifiers generalized consistently from validation to the previously untouched historical test set. DistilBERT retained its advantage over the TF-IDF + Logistic Regression baseline, reaching 99.23% test accuracy, 99.16% recall, and a 0.70% false-positive rate. The baseline reached 98.25% accuracy, 98.47% recall, and a 1.96% false-positive rate. The close agreement between validation and final-test metrics reduces the likelihood that the validation results were an isolated split-specific outcome.
 
-However, the controlled synthetic evaluation reversed that ordering.
+This matters for interpreting the synthetic experiment. The later decline did not occur simply because the models encountered unseen messages. Both models had already demonstrated strong performance on unseen historical examples.
 
-The baseline detected 55.4% of the synthetic phishing-class messages, while DistilBERT detected only 36.2%.
+### 17.2 Controlled Synthetic Distribution Shift
 
-This suggests that model complexity alone does not guarantee robustness.
+Performance changed substantially on the separately frozen, positive-only set of 500 controlled synthetic phishing-class messages. Detection fell to 55.4% for the baseline and 36.2% for DistilBERT. The model ordering therefore reversed on this particular evaluation set despite DistilBERT's stronger historical performance.
 
-One possible interpretation is that DistilBERT learned highly effective representations for the historical training distribution but relied on patterns that did not transfer as well to the controlled synthetic distribution. The high-confidence error analysis supports this interpretation because many synthetic misses were classified as legitimate with extremely high confidence.
+The paired comparison strengthens the observation within this dataset: the baseline uniquely detected 109 messages, whereas DistilBERT uniquely detected 13. The exact McNemar test found a strong difference in paired outcomes (p < 0.001). This statistical result applies to the designed synthetic set and does not establish that the baseline would outperform DistilBERT across a broader population of AI-generated phishing.
 
-Communication style appears especially important.
+A plausible interpretation is that DistilBERT learned representations that were highly effective for the historical distribution but transferred less effectively to the controlled synthetic distribution. The experiment does not identify a single causal mechanism, so the reversal should be treated as evidence of model-specific sensitivity to this distribution shift rather than proof of why that sensitivity occurred.
 
-Security-oriented messages preserved recognizable phishing-associated language and were detected frequently.
+### 17.3 Communication Style and Failure Patterns
 
-Routine workplace and social messages were much more likely to be missed, even when their experimental label remained phishing-class.
+Detection varied more sharply across communication styles than across the two generation sources. Account/security messages were detected frequently by both classifiers, while workplace/business and general social-engineering messages were missed much more often. The associated vocabulary analysis showed the same descriptive pattern: recognizable security terminology appeared more often among detected messages, whereas routine organizational language appeared more often among misses.
 
-This pattern suggests that defensive phishing models should be evaluated across a range of realistic writing styles rather than only on familiar historical corpora.
+Message length provides little evidence for an alternative explanation. Detected and missed synthetic messages had similar median lengths, and typical synthetic messages were well below DistilBERT's 256-token input limit. This makes simple length differences or truncation unlikely to account for the observed decline.
 
-The experiment also demonstrates why a single headline accuracy value can be misleading.
+These patterns remain descriptive. The experiment was not designed to isolate individual words or communication styles as causal factors, and the controlled synthetic categories should not be treated as representative samples of all real phishing communication.
 
-A model with 99% validation accuracy may still fail substantially under distribution shift.
+### 17.4 Confidence Under Shift
+
+DistilBERT's confidence behavior is an additional concern. Of its 319 synthetic misses, 290 were predicted legitimate with at least 90% confidence and 233 with at least 99% confidence. Its median confidence among misses was 99.92%. The model therefore often failed without signaling uncertainty through its raw output score.
+
+This result is consistent with prior work showing that neural-network confidence can be poorly calibrated and can become less reliable under dataset shift [8,9]. It does not mean that a 99% softmax score represents a 99% probability of correctness. Instead, the result shows that confidence thresholding alone would not have reliably identified many of the failures observed here.
+
+### 17.5 Implications for Defensive Evaluation
+
+Taken together, the experiments show why benchmark performance and robustness should be evaluated separately. DistilBERT was the stronger classifier on both historical validation and the untouched historical test set, yet it experienced the larger decline on the controlled synthetic distribution. The baseline was more robust on this specific synthetic set, but it also missed 44.6% of those messages.
+
+The practical research implication is not that either architecture is universally preferable. Rather, defensive phishing classifiers should be tested across multiple independent distributions, communication styles, and time periods before strong claims about deployment reliability are made. High same-distribution accuracy, even when confirmed on a held-out test set, does not by itself establish robustness to materially different text distributions.
 
 ---
 
