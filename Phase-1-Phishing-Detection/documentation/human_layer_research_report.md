@@ -6,7 +6,7 @@ This study investigates whether machine-learning and Natural Language Processing
 
 Two classifiers were developed and compared: a TF-IDF + Logistic Regression baseline and a fine-tuned DistilBERT transformer model. Both were trained using a large historical email dataset assembled from multiple public corpora. After reproducible cleaning and deduplication, the dataset contained 208,161 emails and was divided into training, validation, and isolated test partitions.
 
-On the traditional validation distribution, both models performed strongly. The baseline achieved 98.24% accuracy, 98.37% phishing recall, and a 1.87% false-positive rate. DistilBERT improved validation performance to 99.21% accuracy, 99.09% phishing recall, and a 0.68% false-positive rate.
+On the traditional validation distribution, both models performed strongly. The baseline achieved 98.24% accuracy, 98.37% phishing recall, and a 1.87% false-positive rate. DistilBERT improved validation performance to 99.21% accuracy, 99.09% phishing recall, and a 0.68% false-positive rate. After model development was complete, the previously isolated 31,225-email historical test set was consumed exactly once. Test performance closely reproduced validation performance: the baseline achieved 98.25% accuracy and 98.47% recall, while DistilBERT achieved 99.23% accuracy and 99.16% recall.
 
 A separate frozen evaluation set of 500 controlled AI-generated phishing-class messages was then used to examine robustness under distribution shift. The baseline detected 55.4% of these messages, while DistilBERT detected 36.2%. DistilBERT also produced many high-confidence incorrect legitimate predictions. The strongest performance differences appeared across communication styles rather than simple message length or generator source. Security-oriented messages were detected much more frequently than routine workplace and general social-engineering messages.
 
@@ -163,7 +163,7 @@ A stratified split using random seed 42 produced:
 
 Exact duplicate email bodies were checked across partitions, and no duplicate bodies were present between the training, validation, and test sets.
 
-The test set was intentionally isolated during model development and robustness analysis.
+The test set was intentionally isolated during model development, validation-based model selection, robustness analysis, and synthetic evaluation. After all model-development decisions were frozen, it was consumed exactly once for final evaluation. No post-test tuning was permitted.
 
 ---
 
@@ -418,9 +418,63 @@ Shared hard cases contained heavily overlapping surface vocabulary, suggesting t
 
 ---
 
-## 11. Controlled AI-Generated Phishing-Class Evaluation
+## 11. Final Held-Out Historical Test Evaluation
 
-### 11.1 Purpose
+### 11.1 One-Shot Protocol
+
+After model development was complete, the frozen TF-IDF + Logistic Regression baseline and frozen DistilBERT model were evaluated once on the previously untouched historical test split.
+
+The test artifact contained 31,225 emails:
+
+- 16,343 legitimate;
+- 14,882 phishing-class.
+
+Before evaluation, the exact test file and frozen model artifacts were fingerprinted with SHA-256 hashes. The test set was then declared consumed. No hyperparameter tuning, retraining, threshold adjustment, calibration fitting, feature selection, or model selection is permitted using these results.
+
+The complete artifact hashes and evaluation record are preserved in `documentation/final_test_evaluation.md`.
+
+### 11.2 Final Test Results
+
+| Metric | TF-IDF + Logistic Regression | DistilBERT |
+| --- | ---: | ---: |
+| Accuracy | **98.2482%** | **99.2314%** |
+| Precision | **97.8631%** | **99.2267%** |
+| Recall | **98.4747%** | **99.1601%** |
+| F1 | **98.1679%** | **99.1934%** |
+| False-positive rate | **1.9580%** | **0.7037%** |
+| False-negative rate | **1.5253%** | **0.8399%** |
+| True negatives | 16,023 | 16,228 |
+| False positives | 320 | 115 |
+| False negatives | 227 | 125 |
+| True positives | 14,655 | 14,757 |
+| Total errors | **547** | **240** |
+
+### 11.3 Validation-to-Test Generalization
+
+| Metric | Baseline Validation | Baseline Test | DistilBERT Validation | DistilBERT Test |
+| --- | ---: | ---: | ---: | ---: |
+| Accuracy | 98.24% | 98.25% | 99.21% | 99.23% |
+| Precision | 97.96% | 97.86% | 99.25% | 99.23% |
+| Recall | 98.37% | 98.47% | 99.09% | 99.16% |
+| F1 | 98.16% | 98.17% | 99.17% | 99.19% |
+| False-positive rate | 1.87% | 1.96% | 0.68% | 0.70% |
+| False-negative rate | 1.63% | 1.53% | 0.91% | 0.84% |
+
+Both frozen models reproduced their validation performance closely on previously unseen historical examples. DistilBERT made 240 test errors compared with 246 validation errors, while the baseline made 547 test errors compared with 548 validation errors.
+
+This distinction is important for the later robustness experiment. The models did not simply fail whenever they encountered unseen email. They generalized strongly to unseen data drawn from the same historical distribution, but their performance declined sharply on the separately constructed synthetic distribution.
+
+### 11.4 Baseline Serialization Limitation
+
+The frozen baseline artifact had been serialized under scikit-learn 1.9.1 and was evaluated in an environment using scikit-learn 1.6.1, producing `InconsistentVersionWarning` messages. A previously verified compatibility adjustment restored the missing `multi_class` attribute without changing learned coefficients or retraining the model. The compatibility-loaded artifact reproduced the original validation metrics exactly before the test set was consumed.
+
+This environment mismatch is retained as a reproducibility limitation rather than hidden. Future model artifacts should be preserved together with an exact pinned training environment.
+
+---
+
+## 12. Controlled AI-Generated Phishing-Class Evaluation
+
+### 12.1 Purpose
 
 The main robustness experiment asked whether models trained on historical email corpora would maintain their performance on a substantially different synthetic email distribution.
 
@@ -428,7 +482,7 @@ A separate dataset of 500 controlled synthetic phishing-class messages was creat
 
 The dataset was frozen before model exposure so the messages could not be edited in response to classifier performance.
 
-### 11.2 Dataset Structure
+### 12.2 Dataset Structure
 
 Five communication categories were used:
 
@@ -456,7 +510,7 @@ Metadata included:
 - generation source;
 - generation date.
 
-### 11.3 Safety Controls
+### 12.3 Safety Controls
 
 The synthetic set was intentionally defensive and non-operational.
 
@@ -472,7 +526,7 @@ Messages did not contain:
 
 Placeholders such as `[LINK_REMOVED]` and `[ATTACHMENT_REMOVED]` were used where appropriate.
 
-### 11.4 Quality Assurance
+### 12.4 Quality Assurance
 
 All 500 accepted samples were validated before model evaluation.
 
@@ -497,13 +551,13 @@ One malformed generation batch was rejected and regenerated before classifier ex
 
 ---
 
-## 12. Synthetic Evaluation Results
+## 13. Synthetic Evaluation Results
 
 Because all synthetic samples belong to the positive phishing class, the main metric is **detection rate / recall**.
 
 Precision and false-positive rate cannot be estimated meaningfully from this positive-only synthetic set.
 
-### 12.1 Overall Results
+### 13.1 Overall Results
 
 | Model | Detected | Missed | Detection Rate | 95% Wilson CI |
 | --- | ---: | ---: | ---: | ---: |
@@ -519,7 +573,7 @@ The ordering also reversed:
 - baseline synthetic detection: 55.40%;
 - DistilBERT synthetic detection: 36.20%.
 
-### 12.2 Results by Category
+### 13.2 Results by Category
 
 | Category | Baseline | DistilBERT |
 | --- | ---: | ---: |
@@ -533,7 +587,7 @@ Both models performed best on account/security-style messages.
 
 Both performed poorly on routine workplace/business and general social-engineering language.
 
-### 12.3 Results by Generator
+### 13.3 Results by Generator
 
 | Generator | Baseline | DistilBERT |
 | --- | ---: | ---: |
@@ -546,7 +600,7 @@ The generator difference was smaller than the communication-style differences.
 
 ---
 
-## 13. Synthetic Prediction Overlap
+## 14. Synthetic Prediction Overlap
 
 The two classifiers were compared on the same 500 synthetic samples.
 
@@ -565,7 +619,7 @@ The frozen evaluation set was not used to tune an ensemble because doing so woul
 
 ---
 
-## 14. Statistical Comparison
+## 15. Statistical Comparison
 
 Because both classifiers evaluated the exact same 500 messages, an exact two-sided McNemar test was used.
 
@@ -594,9 +648,9 @@ This result should not be interpreted as evidence that Logistic Regression is un
 
 ---
 
-## 15. Synthetic Robustness Analysis
+## 16. Synthetic Robustness Analysis
 
-### 15.1 Message Length
+### 16.1 Message Length
 
 Synthetic messages were short overall:
 
@@ -619,7 +673,7 @@ The synthetic messages were also far below the 256-token limit in typical cases.
 
 Therefore, simple message length and transformer truncation are unlikely to explain the synthetic performance collapse.
 
-### 15.2 Language Associations
+### 16.2 Language Associations
 
 For both models, higher detection was associated with recognizable account/security language such as:
 
@@ -643,7 +697,7 @@ Misses were more associated with routine organizational language such as:
 
 These are descriptive associations within the synthetic dataset. They are not causal explanations and should not be interpreted as isolated trigger words.
 
-### 15.3 Confidence
+### 16.3 Confidence
 
 Baseline missed 223 messages.
 
@@ -662,7 +716,7 @@ Among those misses:
 
 DistilBERT therefore did not simply become uncertain under distribution shift. It was often extremely confident in incorrect legitimate classifications.
 
-### 15.4 High-Confidence Misses by Category
+### 16.4 High-Confidence Misses by Category
 
 For DistilBERT:
 
@@ -678,11 +732,13 @@ The strongest high-confidence failures occurred in general social-engineering an
 
 ---
 
-## 16. Discussion
+## 17. Discussion
 
-The most important result is the contrast between in-distribution validation performance and out-of-distribution synthetic performance.
+The most important result is the contrast between in-distribution historical generalization and out-of-distribution synthetic performance.
 
-On historical validation data, DistilBERT clearly outperformed the TF-IDF + Logistic Regression baseline. It achieved higher accuracy, higher recall, higher F1, and a substantially lower false-positive rate.
+On historical validation data, DistilBERT clearly outperformed the TF-IDF + Logistic Regression baseline. It achieved higher accuracy, higher recall, higher F1, and a substantially lower false-positive rate. Crucially, this ordering and the absolute performance levels were independently reproduced on the untouched 31,225-email historical test set. The baseline reached 98.25% test accuracy and 98.47% recall, while DistilBERT reached 99.23% test accuracy and 99.16% recall.
+
+The close validation-to-test agreement makes the later synthetic result more informative. The synthetic decline cannot be explained simply by either model failing to generalize to unseen examples. Both models generalized strongly to unseen examples from the historical distribution before degrading on the controlled synthetic distribution.
 
 However, the controlled synthetic evaluation reversed that ordering.
 
@@ -706,7 +762,7 @@ A model with 99% validation accuracy may still fail substantially under distribu
 
 ---
 
-## 17. Defensive Prototype
+## 18. Defensive Prototype
 
 A Streamlit application was developed to demonstrate how the DistilBERT model could be used as an interactive defensive prototype.
 
@@ -740,59 +796,59 @@ These three checks are demonstrations of prototype behavior, not a separate benc
 
 ---
 
-## 18. Limitations
+## 19. Limitations
 
 This study has several important limitations.
 
-### 18.1 Historical Dataset Age
+### 19.1 Historical Dataset Age
 
 Many source emails come from older corpora.
 
 Language, email formatting, attack strategies, and normal user communication patterns have changed over time.
 
-### 18.2 Broad Positive Class
+### 19.2 Broad Positive Class
 
 The historical dataset groups multiple forms of spam, scams, and phishing into a broad positive class.
 
 The resulting classifier is therefore not trained exclusively on narrowly defined credential-phishing examples.
 
-### 18.3 Corpus Artifacts
+### 19.3 Corpus Artifacts
 
 Although explicit source-marker and length analyses were performed, historical corpus effects may still influence model behavior.
 
 No artifact-removal experiment can prove the complete absence of dataset-source bias.
 
-### 18.4 Synthetic Dataset Size
+### 19.4 Synthetic Dataset Size
 
 The synthetic evaluation contains only 500 messages.
 
 It is large enough to reveal strong performance differences in this experiment, but it is not representative of every possible AI-generated phishing style.
 
-### 18.5 Limited Generation Sources
+### 19.5 Limited Generation Sources
 
 Only two generation sources were included.
 
 The findings should not be generalized to all generative models.
 
-### 18.6 Positive-Only Synthetic Evaluation
+### 19.6 Positive-Only Synthetic Evaluation
 
 All synthetic examples belong to the phishing class.
 
 Therefore, the experiment estimates detection rate/recall but does not independently estimate synthetic-set false-positive rate or precision.
 
-### 18.7 Controlled Safety Constraints
+### 19.7 Controlled Safety Constraints
 
 The synthetic messages were deliberately non-operational.
 
 That improves research safety but also means they may differ from real malicious messages in ways that influence model behavior.
 
-### 18.8 Confidence Calibration
+### 19.8 Confidence Calibration
 
 DistilBERT showed severe overconfidence on many synthetic misses.
 
 The classifier's raw softmax confidence should not be interpreted as a calibrated probability of real-world correctness, consistent with prior work showing that modern neural-network confidence can be miscalibrated and can degrade under distribution shift [8,9].
 
-### 18.9 Statistical Generalization
+### 19.9 Statistical Generalization
 
 Wilson intervals and McNemar testing describe uncertainty and paired differences within the designed evaluation framework.
 
@@ -800,7 +856,7 @@ Because the synthetic examples were controlled rather than randomly sampled from
 
 ---
 
-## 19. Ethical and Safety Considerations
+## 20. Ethical and Safety Considerations
 
 This project is designed exclusively for defensive cybersecurity research.
 
@@ -823,7 +879,7 @@ The final prototype is also presented as a research system rather than a product
 
 ---
 
-## 20. AI Assistance and Researcher Role
+## 21. AI Assistance and Researcher Role
 
 AI tools were used during the project as research and development assistants.
 
@@ -845,7 +901,7 @@ Where a school, competition, publication, or other formal submission has its own
 
 ---
 
-## 21. Reproducibility
+## 22. Reproducibility
 
 The repository includes scripts for:
 
@@ -875,6 +931,7 @@ Key files include:
 - `src/evaluate_synthetic.py`
 - `documentation/synthetic_evaluation_methodology.md`
 - `documentation/synthetic_evaluation_results.md`
+- `documentation/final_test_evaluation.md`
 - `demo/phishing_detector_app.py`
 
 The trained DistilBERT model is hosted separately because the weights are too large for a normal GitHub source file:
@@ -885,15 +942,15 @@ Raw large datasets and model artifacts are intentionally not committed directly 
 
 ---
 
-## 22. Conclusion
+## 23. Conclusion
 
 This study demonstrates that strong phishing-classification performance on a familiar validation distribution does not guarantee robustness under distribution shift.
 
-The TF-IDF + Logistic Regression baseline achieved 98.24% validation accuracy and 98.37% phishing recall.
+The TF-IDF + Logistic Regression baseline achieved 98.24% validation accuracy and 98.37% phishing recall, then reproduced that performance on the untouched historical test set with 98.25% accuracy and 98.47% recall.
 
-DistilBERT improved those results to 99.21% accuracy and 99.09% recall while also reducing the false-positive rate to 0.68%.
+DistilBERT achieved 99.21% validation accuracy and 99.09% recall, then reached 99.23% accuracy and 99.16% recall on the untouched historical test set. Its final historical test false-positive rate was 0.70%.
 
-However, both models degraded sharply on a frozen set of controlled AI-generated phishing-class messages.
+The close validation-to-test agreement demonstrates strong same-distribution generalization for both frozen classifiers. However, both models degraded sharply on the separately frozen set of controlled AI-generated phishing-class messages.
 
 The baseline detected 55.4%, while DistilBERT detected 36.2%.
 
