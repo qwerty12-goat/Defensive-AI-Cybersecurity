@@ -2,10 +2,7 @@ import streamlit as st
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-MODEL_DIR = (
-    "/content/drive/MyDrive/Defensive-AI-Cybersecurity/"
-    "transformer_artifacts/distilbert_phishing"
-)
+MODEL_ID = "ozuvadh/defensive-ai-phishing-distilbert"
 
 st.set_page_config(
     page_title="Defensive AI Phishing Detector",
@@ -29,7 +26,7 @@ st.info(
 
 @st.cache_resource
 def load_model():
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
 
     model = AutoModelForSequenceClassification.from_pretrained(
         MODEL_DIR
