@@ -21,9 +21,9 @@ The Human Layer is the current completed research component. The Network Layer i
 
 ### Research Question
 
-**How accurately can machine-learning and Natural Language Processing models distinguish AI-generated phishing emails from legitimate emails while maintaining a low false-positive rate?**
+**How accurately can machine-learning and Natural Language Processing models distinguish phishing-class from legitimate historical emails while maintaining a low false-positive rate, and how robust are those frozen classifiers to a controlled synthetic phishing-class distribution?**
 
-A secondary question asks whether controlled AI-generated phishing-class messages are more difficult to detect than traditional phishing-class messages.
+A secondary question asks how detection performance on controlled synthetic phishing-class messages compares with performance on held-out historical phishing-class emails.
 
 ### Models
 
@@ -55,7 +55,7 @@ The processed data was split with a fixed random seed into:
 
 No exact duplicate email bodies were allowed across the splits.
 
-The final test set remains isolated from model-development experiments.
+The test set remained isolated throughout model development and was consumed exactly once after all model-development decisions were frozen. No post-test tuning, retraining, threshold adjustment, calibration fitting, feature selection, or model selection was permitted.
 
 ---
 
@@ -76,6 +76,28 @@ The DistilBERT validation confusion matrix was:
 - True positives: 14,746
 
 Compared with the baseline, DistilBERT reduced total validation errors from **548 to 246**.
+
+---
+
+## Final Held-Out Historical Test Results
+
+After model development was complete, both frozen classifiers were evaluated once on the previously untouched **31,225-email** historical test set.
+
+| Model | Accuracy | Precision | Recall | F1 | False-Positive Rate | False-Negative Rate |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| TF-IDF + Logistic Regression | 98.25% | 97.86% | 98.47% | 98.17% | 1.96% | 1.53% |
+| DistilBERT | 99.23% | 99.23% | 99.16% | 99.19% | 0.70% | 0.84% |
+
+The final confusion-matrix counts were:
+
+| Model | TN | FP | FN | TP | Total Errors |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| TF-IDF + Logistic Regression | 16,023 | 320 | 227 | 14,655 | 547 |
+| DistilBERT | 16,228 | 115 | 125 | 14,757 | 240 |
+
+The close validation-to-test agreement provides evidence of strong same-distribution generalization for both frozen models. This makes the later decline on the controlled synthetic distribution distinct from ordinary failure to generalize to unseen historical examples.
+
+The test set is now permanently treated as consumed. Future model improvements require a new independent holdout rather than further tuning against these test results.
 
 ---
 
@@ -300,6 +322,7 @@ The frozen synthetic evaluation set should not be reused for tuning without crea
 - Robustness analysis: complete
 - Controlled AI-generated evaluation: complete
 - Defensive demo: complete
+- Final held-out historical test evaluation: complete
 - Final report and repository polish: in progress
 
 ### Network Layer
@@ -314,8 +337,8 @@ The Network Layer will investigate machine-learning detection of suspicious or a
 
 The Human Layer experiments show two things at the same time:
 
-1. modern NLP models can achieve very strong performance on a familiar historical validation distribution;
-2. that performance can degrade sharply when the writing distribution changes.
+1. both classifiers generalized strongly from validation to a previously untouched historical test set;
+2. that strong same-distribution performance still degraded sharply when the writing distribution changed.
 
 Within the controlled synthetic evaluation, communication style appeared more informative than simple message length or generator source, and DistilBERT frequently made highly confident incorrect predictions.
 
