@@ -1,14 +1,14 @@
-# Detecting AI-Generated Phishing Emails Using Natural Language Processing and Machine Learning
+# Evaluating Phishing Email Classifiers Under Controlled Synthetic Distribution Shift
 
 ## Abstract
 
-This study investigates whether machine-learning and Natural Language Processing models can distinguish phishing-class email content from legitimate email content while maintaining a low false-positive rate, and whether controlled AI-generated phishing-class messages are more difficult to detect than traditional phishing-class messages.
+This study investigates whether machine-learning and Natural Language Processing models can distinguish phishing-class email content from legitimate email content while maintaining a low false-positive rate, and whether controlled controlled synthetic phishing-class messages are more difficult to detect than traditional phishing-class messages.
 
 Two classifiers were developed and compared: a TF-IDF + Logistic Regression baseline and a fine-tuned DistilBERT transformer model. Both were trained using a large historical email dataset assembled from multiple public corpora. After reproducible cleaning and deduplication, the dataset contained 208,161 emails and was divided into training, validation, and isolated test partitions.
 
 On the traditional validation distribution, both models performed strongly. The baseline achieved 98.24% accuracy, 98.37% phishing recall, and a 1.87% false-positive rate. DistilBERT improved validation performance to 99.21% accuracy, 99.09% phishing recall, and a 0.68% false-positive rate. After model development was complete, the previously isolated 31,225-email historical test set was consumed exactly once. Test performance closely reproduced validation performance: the baseline achieved 98.25% accuracy and 98.47% recall, while DistilBERT achieved 99.23% accuracy and 99.16% recall.
 
-A separate frozen evaluation set of 500 controlled AI-generated phishing-class messages was then used to examine robustness under distribution shift. The baseline detected 55.4% of these messages, while DistilBERT detected 36.2%. DistilBERT also produced many high-confidence incorrect legitimate predictions. The strongest performance differences appeared across communication styles rather than simple message length or generator source. Security-oriented messages were detected much more frequently than routine workplace and general social-engineering messages.
+A separate frozen evaluation set of 500 controlled controlled synthetic phishing-class messages was then used to examine robustness under distribution shift. The baseline detected 55.4% of these messages, while DistilBERT detected 36.2%. DistilBERT also produced many high-confidence incorrect legitimate predictions. The strongest performance differences appeared across communication styles rather than simple message length or generator source. Security-oriented messages were detected much more frequently than routine workplace and general social-engineering messages.
 
 The results show that strong in-distribution validation performance does not necessarily imply robustness to a substantially different synthetic email distribution. They also show that a more complex transformer model can outperform a simpler baseline on familiar data while degrading more sharply under distribution shift.
 
@@ -48,7 +48,7 @@ At the same time, strong benchmark accuracy does not by itself establish robustn
 
 ### 2.4 Generative AI and Phishing
 
-Generative AI changes both the offensive and defensive sides of phishing research. Eze and Shamir constructed and analyzed a corpus of AI-generated phishing emails and reported that AI-generated phishing displayed stylistic differences from human-generated scam email, arguing that future defensive systems should account for AI-generated content during model development [5].
+Generative AI changes both the offensive and defensive sides of phishing research. Eze and Shamir constructed and analyzed a corpus of controlled synthetic phishing-class messages and reported that AI-generated phishing displayed stylistic differences from human-generated scam email, arguing that future defensive systems should account for AI-generated content during model development [5].
 
 A 2026 systematic review by Sivaneswaran et al. examined 36 studies involving LLMs in phishing generation and detection. The review found that LLM research has expanded both the ability to generate coherent phishing content and the ability to build more context-aware defensive systems; it also noted that many studies rely on manually generated datasets rather than standardized public benchmarks [6].
 
@@ -74,15 +74,15 @@ The present study is designed around that distinction. It does not attempt to pr
 
 ### Primary Research Question
 
-**How accurately can machine-learning and Natural Language Processing models distinguish AI-generated phishing emails from legitimate emails while maintaining a low false-positive rate?**
+**How accurately can machine-learning and Natural Language Processing models distinguish phishing-class from legitimate historical emails while maintaining a low false-positive rate, and how robust are those frozen classifiers to a controlled synthetic phishing-class distribution?**
 
 ### Secondary Research Question
 
-**Are AI-generated phishing emails more difficult for machine-learning models to detect than traditional phishing emails?**
+**How does detection performance on controlled synthetic phishing-class messages compare with performance on held-out historical phishing-class emails?**
 
 ### Hypothesis
 
-The initial hypothesis was that NLP-based machine-learning models would distinguish phishing-class from legitimate email using language and structural patterns, but that controlled AI-generated phishing-class messages could be more difficult to detect because they may use more fluent and less stereotypical language.
+The initial hypothesis was that NLP-based machine-learning models would distinguish phishing-class from legitimate email using language and structural patterns, but that controlled controlled synthetic phishing-class messages could be more difficult to detect because they may use more fluent and less stereotypical language.
 
 A second expectation was that DistilBERT could outperform the TF-IDF + Logistic Regression baseline on standard validation data because it can represent contextual language patterns that sparse bag-of-words features cannot capture directly.
 
@@ -974,25 +974,17 @@ Raw large datasets and model artifacts are intentionally not committed directly 
 
 ## 23. Conclusion
 
-This study demonstrates that strong phishing-classification performance on a familiar validation distribution does not guarantee robustness under distribution shift.
+This study evaluated two phishing-email classifiers under both same-distribution historical testing and a separately constructed controlled synthetic distribution shift.
 
-The TF-IDF + Logistic Regression baseline achieved 98.24% validation accuracy and 98.37% phishing recall, then reproduced that performance on the untouched historical test set with 98.25% accuracy and 98.47% recall.
+The TF-IDF + Logistic Regression baseline achieved 98.25% accuracy, 98.47% phishing-class recall, and a 1.96% false-positive rate on the previously untouched historical test set. DistilBERT achieved 99.23% accuracy, 99.16% recall, and a 0.70% false-positive rate. These results closely reproduced validation performance, providing evidence that both frozen models generalized strongly to unseen examples from the historical distribution.
 
-DistilBERT achieved 99.21% validation accuracy and 99.09% recall, then reached 99.23% accuracy and 99.16% recall on the untouched historical test set. Its final historical test false-positive rate was 0.70%.
+Performance changed substantially on the separate positive-only set of 500 controlled synthetic phishing-class messages. The baseline detected 55.4% and DistilBERT detected 36.2%. Detection also varied sharply by designed communication style: account/security messages were detected frequently, while workplace/business and general social-engineering messages were missed much more often. DistilBERT additionally produced many incorrect legitimate classifications with very high raw confidence.
 
-The close validation-to-test agreement demonstrates strong same-distribution generalization for both frozen classifiers. However, both models degraded sharply on the separately frozen set of controlled AI-generated phishing-class messages.
+These synthetic results should be interpreted as a robustness stress test, not as an estimate of performance on the population of real-world AI-generated phishing. The controlled set used two generation sources, deliberate safety constraints, five designed communication categories, and only positive-class examples. It therefore demonstrates that the frozen classifiers were sensitive to this specific distribution shift without establishing how either model would perform across all contemporary or AI-assisted phishing.
 
-The baseline detected 55.4%, while DistilBERT detected 36.2%.
+The central finding is that strong held-out performance within a familiar data distribution does not by itself establish robustness to materially different text distributions. Evaluating defensive classifiers across independent datasets, writing styles, time periods, and distribution shifts is therefore important alongside conventional accuracy, recall, F1, and false-positive measurements.
 
-The largest performance differences were associated with communication style. Security-oriented messages were detected frequently, while routine workplace and general social-engineering styles were much more difficult.
-
-DistilBERT also made many synthetic errors with extremely high confidence, showing that confidence alone was not a reliable warning of model failure.
-
-The central conclusion is therefore not that one model is universally better.
-
-Instead, the project shows that defensive AI systems should be evaluated both for standard predictive performance and for robustness when the writing distribution changes.
-
-Future work should include additional independent synthetic holdouts, more current real-world datasets, broader generator coverage, calibration analysis, and the planned network-layer component of the Defensive AI Cybersecurity project.
+Future work should evaluate additional independent holdouts, newer real-world email corpora, broader controlled generator coverage, and explicit confidence-calibration methods without reusing the consumed test or synthetic evaluation sets for model tuning. The broader Defensive AI Cybersecurity project will also extend this layered evaluation framework to the planned network-layer component.
 
 ---
 
