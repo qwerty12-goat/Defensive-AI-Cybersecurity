@@ -26,7 +26,51 @@ The study compares a traditional sparse-text baseline with a transformer-based N
 
 ---
 
-## 2. Research Questions
+## 2. Related Work
+
+### 2.1 NLP and Machine Learning for Phishing Email Detection
+
+Phishing-email detection has a substantial history in Natural Language Processing and machine learning. Salloum et al. surveyed NLP-based phishing-email detection research and found that machine-learning approaches commonly rely on lexical, structural, and statistical properties of messages to distinguish malicious from legitimate email [1]. Their review also emphasized that phishing detection remains an evolving problem rather than a solved binary-classification task.
+
+This prior literature motivates the use of a transparent classical baseline in the present study. TF-IDF combined with a linear classifier provides a useful reference point because it exposes which lexical features contribute strongly to decisions while remaining computationally inexpensive. A central question in this project is not simply whether such a baseline can achieve high accuracy, but whether its learned patterns remain useful when the writing distribution changes.
+
+### 2.2 Contextual Transformer Models
+
+BERT introduced bidirectional transformer pre-training that can be fine-tuned for downstream text-classification tasks using contextual representations rather than only sparse lexical features [2]. DistilBERT was subsequently proposed as a compressed BERT-family model using knowledge distillation. Sanh et al. reported that DistilBERT reduced model size by approximately 40% while retaining most of BERT's language-understanding performance and improving inference efficiency [3].
+
+These properties make DistilBERT a useful advanced comparison for phishing-email classification. Unlike TF-IDF, it can represent words in context and capture relationships across a sequence. The present study therefore compares a sparse lexical model with a contextual transformer under the same dataset split and evaluation framework.
+
+### 2.3 Transformer and LLM-Based Phishing Detection
+
+Recent work has increasingly applied transformer architectures to phishing detection. Uddin, Mahiuddin, and Sarker evaluated a fine-tuned RoBERTa model for phishing-email classification and reported 98.45% accuracy while also using explainability methods to inspect model decisions [4]. This supports the broader finding that transformer-based representations can perform strongly on phishing-email benchmarks.
+
+At the same time, strong benchmark accuracy does not by itself establish robustness to new writing distributions. Much of the published phishing-detection literature evaluates models on train/test partitions drawn from the same or closely related corpora. This project extends that evaluation perspective by separating ordinary held-out historical generalization from a controlled synthetic distribution-shift experiment.
+
+### 2.4 Generative AI and Phishing
+
+Generative AI changes both the offensive and defensive sides of phishing research. Eze and Shamir constructed and analyzed a corpus of AI-generated phishing emails and reported that AI-generated phishing displayed stylistic differences from human-generated scam email, arguing that future defensive systems should account for AI-generated content during model development [5].
+
+A 2026 systematic review by Sivaneswaran et al. examined 36 studies involving LLMs in phishing generation and detection. The review found that LLM research has expanded both the ability to generate coherent phishing content and the ability to build more context-aware defensive systems; it also noted that many studies rely on manually generated datasets rather than standardized public benchmarks [6].
+
+Human-subject research further suggests that simple LLM-assisted personalization can produce socially convincing deceptive messages. Francia et al. compared GPT-4-generated and human-authored personalized smishing messages in a controlled 25-target pilot study. They found that the observed intended-click rate was higher for the GPT-4 condition, although the difference was statistically uncertain, and participants could not reliably identify message authorship better than chance [7]. That work concerns SMS rather than email and does not directly measure classifier robustness, but it reinforces the importance of evaluating defensive systems on natural and varied communication styles rather than assuming that AI-generated malicious text will contain obvious surface cues.
+
+### 2.5 Confidence Under Distribution Shift
+
+The confidence behavior of neural classifiers is also relevant to this study. Guo et al. showed that modern neural networks can be poorly calibrated, meaning predicted confidence does not necessarily correspond to empirical correctness [8]. Ovadia et al. later demonstrated that predictive uncertainty can deteriorate further under dataset shift, emphasizing that high model confidence should not automatically be treated as evidence that an out-of-distribution prediction is trustworthy [9].
+
+These findings provide important context for the confidence analysis in this project. The synthetic experiment does not assume that softmax probability is a calibrated real-world probability. Instead, confidence is analyzed descriptively to determine whether the model becomes uncertain when it fails under the controlled distribution shift.
+
+### 2.6 Research Gap Addressed in This Study
+
+The literature establishes that classical NLP methods, transformer models, and LLM-based systems can all perform strongly in phishing-related tasks. It also establishes that generative AI can alter phishing language and that neural confidence can become unreliable under distribution shift.
+
+A gap directly relevant to this project is the need to evaluate the **same frozen phishing classifiers across both an untouched in-distribution test set and a separately constructed synthetic out-of-distribution set**, while also examining error overlap, message style, input length, source artifacts, and confidence behavior.
+
+The present study is designed around that distinction. It does not attempt to prove that its synthetic set represents all AI-generated phishing. Instead, it asks whether models that generalize strongly to unseen historical emails retain that performance when evaluated on a controlled writing distribution that differs substantially from their training data.
+
+---
+
+## 3. Research Questions
 
 ### Primary Research Question
 
@@ -44,11 +88,11 @@ A second expectation was that DistilBERT could outperform the TF-IDF + Logistic 
 
 ---
 
-## 3. Dataset
+## 4. Dataset
 
-### 3.1 Historical Email Dataset
+### 4.1 Historical Email Dataset
 
-The primary dataset was the **Phishing-Email-Detection-Dataset**, published on Zenodo and associated with the repository:
+The primary dataset was the **Phishing-Email-Detection-Dataset**, published on Zenodo by Alhuzali, Alloqmani, Aljabri, and Alharbi [10] and associated with the repository:
 
 https://github.com/Manar-ibr/Phishing-Email-Detection-Dataset
 
@@ -68,7 +112,7 @@ The merged dataset combines several historical email corpora, including sources 
 
 The positive class is broader than narrowly defined credential phishing. Spam, scam, and phishing-related content are grouped into the phishing class in the merged source.
 
-### 3.2 Raw Dataset Inspection
+### 4.2 Raw Dataset Inspection
 
 The raw merged dataset contained:
 
@@ -83,7 +127,7 @@ The raw merged dataset contained:
 
 The email-length distribution was highly skewed. The median message length was 789 characters, while a small number of records were extremely large. Long emails were not automatically deleted solely because of length.
 
-### 3.3 Cleaning
+### 4.3 Cleaning
 
 Cleaning was performed programmatically so the process could be reproduced.
 
@@ -107,7 +151,7 @@ Class distribution:
 
 The cleaned dataset retained its natural class distribution rather than being manually balanced.
 
-### 3.4 Train, Validation, and Test Split
+### 4.4 Train, Validation, and Test Split
 
 A stratified split using random seed 42 produced:
 
@@ -123,7 +167,7 @@ The test set was intentionally isolated during model development and robustness 
 
 ---
 
-## 4. Exploratory Data Analysis
+## 5. Exploratory Data Analysis
 
 Formal exploratory analysis was performed using the training partition only.
 
@@ -148,9 +192,9 @@ These differences indicated that message length contained some predictive inform
 
 ---
 
-## 5. Baseline Model
+## 6. Baseline Model
 
-### 5.1 Model Design
+### 6.1 Model Design
 
 The baseline classifier used:
 
@@ -165,7 +209,7 @@ The baseline classifier used:
 - Logistic Regression using the `liblinear` solver;
 - random seed 42.
 
-### 5.2 Validation Results
+### 6.2 Validation Results
 
 The baseline produced:
 
@@ -187,7 +231,7 @@ Confusion matrix:
 
 Total validation errors: **548**.
 
-### 5.3 Baseline Interpretation
+### 6.3 Baseline Interpretation
 
 The highest positive-weight features included terms such as:
 
@@ -211,9 +255,9 @@ That concern motivated additional robustness experiments.
 
 ---
 
-## 6. Baseline Robustness Experiments
+## 7. Baseline Robustness Experiments
 
-### 6.1 Artifact Removal
+### 7.1 Artifact Removal
 
 A stronger artifact-removal evaluation removed or masked obvious source-related markers such as years, numeric patterns, and recognizable corpus artifacts.
 
@@ -229,7 +273,7 @@ The resulting validation metrics were:
 
 The small change from the original baseline suggests that the classifier's performance was not explained only by a small set of obvious source markers.
 
-### 6.2 Length-Only Classifier
+### 7.2 Length-Only Classifier
 
 A separate classifier using message length as the main predictive signal produced:
 
@@ -244,11 +288,11 @@ This demonstrated that length contains signal, but it is not sufficient to expla
 
 ---
 
-## 7. DistilBERT Model
+## 8. DistilBERT Model
 
-### 7.1 Training Configuration
+### 8.1 Training Configuration
 
-The advanced NLP model used **DistilBERT base uncased**.
+The advanced NLP model used **DistilBERT base uncased** [3].
 
 Training settings included:
 
@@ -264,7 +308,7 @@ Training settings included:
 
 Training was performed using an NVIDIA Tesla T4 environment.
 
-### 7.2 Validation Results
+### 8.2 Validation Results
 
 DistilBERT produced:
 
@@ -286,7 +330,7 @@ Confusion matrix:
 
 Total validation errors: **246**.
 
-### 7.3 Comparison with Baseline
+### 8.3 Comparison with Baseline
 
 Compared with the baseline, DistilBERT achieved:
 
@@ -300,9 +344,9 @@ On the traditional validation distribution, DistilBERT was the stronger classifi
 
 ---
 
-## 8. Transformer Error Analysis
+## 9. Transformer Error Analysis
 
-### 8.1 Error Counts
+### 9.1 Error Counts
 
 DistilBERT made:
 
@@ -320,7 +364,7 @@ Median false-negative message size:
 - 1,333 characters;
 - 198 words.
 
-### 8.2 Error Confidence
+### 9.2 Error Confidence
 
 Among the 246 DistilBERT validation errors:
 
@@ -330,7 +374,7 @@ Among the 246 DistilBERT validation errors:
 
 This showed that many incorrect predictions were not merely borderline cases.
 
-### 8.3 Context-Length Investigation
+### 9.3 Context-Length Investigation
 
 Token-length analysis showed that some errors exceeded the 256-token cutoff, especially false negatives.
 
@@ -353,7 +397,7 @@ Therefore, truncation contributed to some errors but was not the primary explana
 
 ---
 
-## 9. Model Error Overlap
+## 10. Model Error Overlap
 
 The baseline and DistilBERT predictions were compared directly on the validation set.
 
@@ -374,9 +418,9 @@ Shared hard cases contained heavily overlapping surface vocabulary, suggesting t
 
 ---
 
-## 10. Controlled AI-Generated Phishing-Class Evaluation
+## 11. Controlled AI-Generated Phishing-Class Evaluation
 
-### 10.1 Purpose
+### 11.1 Purpose
 
 The main robustness experiment asked whether models trained on historical email corpora would maintain their performance on a substantially different synthetic email distribution.
 
@@ -384,7 +428,7 @@ A separate dataset of 500 controlled synthetic phishing-class messages was creat
 
 The dataset was frozen before model exposure so the messages could not be edited in response to classifier performance.
 
-### 10.2 Dataset Structure
+### 11.2 Dataset Structure
 
 Five communication categories were used:
 
@@ -412,7 +456,7 @@ Metadata included:
 - generation source;
 - generation date.
 
-### 10.3 Safety Controls
+### 11.3 Safety Controls
 
 The synthetic set was intentionally defensive and non-operational.
 
@@ -428,7 +472,7 @@ Messages did not contain:
 
 Placeholders such as `[LINK_REMOVED]` and `[ATTACHMENT_REMOVED]` were used where appropriate.
 
-### 10.4 Quality Assurance
+### 11.4 Quality Assurance
 
 All 500 accepted samples were validated before model evaluation.
 
@@ -453,13 +497,13 @@ One malformed generation batch was rejected and regenerated before classifier ex
 
 ---
 
-## 11. Synthetic Evaluation Results
+## 12. Synthetic Evaluation Results
 
 Because all synthetic samples belong to the positive phishing class, the main metric is **detection rate / recall**.
 
 Precision and false-positive rate cannot be estimated meaningfully from this positive-only synthetic set.
 
-### 11.1 Overall Results
+### 12.1 Overall Results
 
 | Model | Detected | Missed | Detection Rate | 95% Wilson CI |
 | --- | ---: | ---: | ---: | ---: |
@@ -475,7 +519,7 @@ The ordering also reversed:
 - baseline synthetic detection: 55.40%;
 - DistilBERT synthetic detection: 36.20%.
 
-### 11.2 Results by Category
+### 12.2 Results by Category
 
 | Category | Baseline | DistilBERT |
 | --- | ---: | ---: |
@@ -489,7 +533,7 @@ Both models performed best on account/security-style messages.
 
 Both performed poorly on routine workplace/business and general social-engineering language.
 
-### 11.3 Results by Generator
+### 12.3 Results by Generator
 
 | Generator | Baseline | DistilBERT |
 | --- | ---: | ---: |
@@ -502,7 +546,7 @@ The generator difference was smaller than the communication-style differences.
 
 ---
 
-## 12. Synthetic Prediction Overlap
+## 13. Synthetic Prediction Overlap
 
 The two classifiers were compared on the same 500 synthetic samples.
 
@@ -521,7 +565,7 @@ The frozen evaluation set was not used to tune an ensemble because doing so woul
 
 ---
 
-## 13. Statistical Comparison
+## 14. Statistical Comparison
 
 Because both classifiers evaluated the exact same 500 messages, an exact two-sided McNemar test was used.
 
@@ -550,9 +594,9 @@ This result should not be interpreted as evidence that Logistic Regression is un
 
 ---
 
-## 14. Synthetic Robustness Analysis
+## 15. Synthetic Robustness Analysis
 
-### 14.1 Message Length
+### 15.1 Message Length
 
 Synthetic messages were short overall:
 
@@ -575,7 +619,7 @@ The synthetic messages were also far below the 256-token limit in typical cases.
 
 Therefore, simple message length and transformer truncation are unlikely to explain the synthetic performance collapse.
 
-### 14.2 Language Associations
+### 15.2 Language Associations
 
 For both models, higher detection was associated with recognizable account/security language such as:
 
@@ -599,7 +643,7 @@ Misses were more associated with routine organizational language such as:
 
 These are descriptive associations within the synthetic dataset. They are not causal explanations and should not be interpreted as isolated trigger words.
 
-### 14.3 Confidence
+### 15.3 Confidence
 
 Baseline missed 223 messages.
 
@@ -618,7 +662,7 @@ Among those misses:
 
 DistilBERT therefore did not simply become uncertain under distribution shift. It was often extremely confident in incorrect legitimate classifications.
 
-### 14.4 High-Confidence Misses by Category
+### 15.4 High-Confidence Misses by Category
 
 For DistilBERT:
 
@@ -634,7 +678,7 @@ The strongest high-confidence failures occurred in general social-engineering an
 
 ---
 
-## 15. Discussion
+## 16. Discussion
 
 The most important result is the contrast between in-distribution validation performance and out-of-distribution synthetic performance.
 
@@ -662,7 +706,7 @@ A model with 99% validation accuracy may still fail substantially under distribu
 
 ---
 
-## 16. Defensive Prototype
+## 17. Defensive Prototype
 
 A Streamlit application was developed to demonstrate how the DistilBERT model could be used as an interactive defensive prototype.
 
@@ -696,59 +740,59 @@ These three checks are demonstrations of prototype behavior, not a separate benc
 
 ---
 
-## 17. Limitations
+## 18. Limitations
 
 This study has several important limitations.
 
-### 17.1 Historical Dataset Age
+### 18.1 Historical Dataset Age
 
 Many source emails come from older corpora.
 
 Language, email formatting, attack strategies, and normal user communication patterns have changed over time.
 
-### 17.2 Broad Positive Class
+### 18.2 Broad Positive Class
 
 The historical dataset groups multiple forms of spam, scams, and phishing into a broad positive class.
 
 The resulting classifier is therefore not trained exclusively on narrowly defined credential-phishing examples.
 
-### 17.3 Corpus Artifacts
+### 18.3 Corpus Artifacts
 
 Although explicit source-marker and length analyses were performed, historical corpus effects may still influence model behavior.
 
 No artifact-removal experiment can prove the complete absence of dataset-source bias.
 
-### 17.4 Synthetic Dataset Size
+### 18.4 Synthetic Dataset Size
 
 The synthetic evaluation contains only 500 messages.
 
 It is large enough to reveal strong performance differences in this experiment, but it is not representative of every possible AI-generated phishing style.
 
-### 17.5 Limited Generation Sources
+### 18.5 Limited Generation Sources
 
 Only two generation sources were included.
 
 The findings should not be generalized to all generative models.
 
-### 17.6 Positive-Only Synthetic Evaluation
+### 18.6 Positive-Only Synthetic Evaluation
 
 All synthetic examples belong to the phishing class.
 
 Therefore, the experiment estimates detection rate/recall but does not independently estimate synthetic-set false-positive rate or precision.
 
-### 17.7 Controlled Safety Constraints
+### 18.7 Controlled Safety Constraints
 
 The synthetic messages were deliberately non-operational.
 
 That improves research safety but also means they may differ from real malicious messages in ways that influence model behavior.
 
-### 17.8 Confidence Calibration
+### 18.8 Confidence Calibration
 
 DistilBERT showed severe overconfidence on many synthetic misses.
 
-The classifier's raw softmax confidence should not be interpreted as a calibrated probability of real-world correctness.
+The classifier's raw softmax confidence should not be interpreted as a calibrated probability of real-world correctness, consistent with prior work showing that modern neural-network confidence can be miscalibrated and can degrade under distribution shift [8,9].
 
-### 17.9 Statistical Generalization
+### 18.9 Statistical Generalization
 
 Wilson intervals and McNemar testing describe uncertainty and paired differences within the designed evaluation framework.
 
@@ -756,7 +800,7 @@ Because the synthetic examples were controlled rather than randomly sampled from
 
 ---
 
-## 18. Ethical and Safety Considerations
+## 19. Ethical and Safety Considerations
 
 This project is designed exclusively for defensive cybersecurity research.
 
@@ -779,7 +823,7 @@ The final prototype is also presented as a research system rather than a product
 
 ---
 
-## 19. AI Assistance and Researcher Role
+## 20. AI Assistance and Researcher Role
 
 AI tools were used during the project as research and development assistants.
 
@@ -801,7 +845,7 @@ Where a school, competition, publication, or other formal submission has its own
 
 ---
 
-## 20. Reproducibility
+## 21. Reproducibility
 
 The repository includes scripts for:
 
@@ -841,7 +885,7 @@ Raw large datasets and model artifacts are intentionally not committed directly 
 
 ---
 
-## 21. Conclusion
+## 22. Conclusion
 
 This study demonstrates that strong phishing-classification performance on a familiar validation distribution does not guarantee robustness under distribution shift.
 
@@ -862,3 +906,28 @@ The central conclusion is therefore not that one model is universally better.
 Instead, the project shows that defensive AI systems should be evaluated both for standard predictive performance and for robustness when the writing distribution changes.
 
 Future work should include additional independent synthetic holdouts, more current real-world datasets, broader generator coverage, calibration analysis, and the planned network-layer component of the Defensive AI Cybersecurity project.
+
+---
+
+## References
+
+[1] S. A. Salloum, T. Gaber, S. Vadera, and K. Shaalan, "Phishing Email Detection Using Natural Language Processing Techniques: A Literature Survey," *Procedia Computer Science*, vol. 189, pp. 19-28, 2021. https://doi.org/10.1016/j.procs.2021.05.077
+
+[2] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding," in *Proceedings of NAACL-HLT 2019*, pp. 4171-4186, 2019. https://doi.org/10.18653/v1/N19-1423
+
+[3] V. Sanh, L. Debut, J. Chaumond, and T. Wolf, "DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter," arXiv:1910.01108, 2019. https://arxiv.org/abs/1910.01108
+
+[4] M. A. Uddin, M. Mahiuddin, and I. H. Sarker, "An explainable transformer-based model for phishing email detection: A large language model approach," *Computer Networks*, vol. 277, article 112061, 2026. https://doi.org/10.1016/j.comnet.2026.112061
+
+[5] C. S. Eze and L. Shamir, "Analysis and Prevention of AI-Based Phishing Email Attacks," *Electronics*, vol. 13, no. 10, article 1839, 2024. https://doi.org/10.3390/electronics13101839
+
+[6] D. Sivaneswaran, C. T. E. R. Hewage, H. M. K. K. M. B. Herath, R. S. Rathore, V. K. Singh, and W. Jiang, "A systematic literature review of large language models in phishing attack generation and detection," *Array*, vol. 30, article 100775, 2026. https://doi.org/10.1016/j.array.2026.100775
+
+[7] J. Francia, D. Hansen, B. Schooley, M. Taylor, S. V. Murray, R. Cornelius, and G. Snow, "Assessing AI-Generated vs. Human-Authored Spear Phishing SMS Attacks: An Empirical Study," *Journal of Cybersecurity and Privacy*, vol. 6, no. 4, article 129, 2026. https://doi.org/10.3390/jcp6040129
+
+[8] C. Guo, G. Pleiss, Y. Sun, and K. Q. Weinberger, "On Calibration of Modern Neural Networks," in *Proceedings of the 34th International Conference on Machine Learning*, PMLR 70, pp. 1321-1330, 2017. https://proceedings.mlr.press/v70/guo17a.html
+
+[9] Y. Ovadia, E. Fertig, J. Ren, Z. Nado, D. Sculley, S. Nowozin, J. Dillon, B. Lakshminarayanan, and J. Snoek, "Can You Trust Your Model's Uncertainty? Evaluating Predictive Uncertainty Under Dataset Shift," in *Advances in Neural Information Processing Systems 32*, 2019. https://proceedings.neurips.cc/paper/2019/hash/8558cb408c1d76621371888657d2eb1d-Abstract.html
+
+[10] A. Alhuzali, A. Alloqmani, M. Aljabri, and F. Alharbi, "Phishing-Email-Detection-Dataset," Zenodo, version 2, 2025. https://doi.org/10.5281/zenodo.17314806
+
