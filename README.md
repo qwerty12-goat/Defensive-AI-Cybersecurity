@@ -314,27 +314,6 @@ The frozen synthetic evaluation set should not be reused for tuning without crea
 
 ---
 
-## Current Project Status
-
-### Human Layer
-
-- Historical dataset preparation: complete
-- Exploratory analysis: complete
-- Baseline model: complete
-- DistilBERT model: complete
-- Robustness analysis: complete
-- Controlled synthetic evaluation: complete
-- Defensive demo: complete
-- Final held-out historical test evaluation: complete
-- Final report and repository polish: in progress
-
-### Network Layer
-
-Planned next research component.
-
-The Network Layer will investigate machine-learning detection of suspicious or automated network behavior using controlled or public network-security datasets.
-
----
 
 ## Core Finding
 
