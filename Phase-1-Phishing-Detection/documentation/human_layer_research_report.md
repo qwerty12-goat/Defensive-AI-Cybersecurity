@@ -462,6 +462,10 @@ The complete artifact hashes and evaluation record are preserved in `documentati
 
 Both frozen models reproduced their validation performance closely on previously unseen historical examples. DistilBERT made 240 test errors compared with 246 validation errors, while the baseline made 547 test errors compared with 548 validation errors.
 
+![Figure 1. Historical validation and final-test performance for the TF-IDF + Logistic Regression baseline and DistilBERT.](../results/figures/figure_1_historical_validation_vs_test.png)
+
+**Figure 1. Historical validation and final-test performance.** Validation and final-test results remain closely aligned for both frozen models, supporting strong same-distribution generalization before the separate synthetic robustness evaluation.
+
 This distinction is important for the later robustness experiment. The models did not simply fail whenever they encountered unseen email. They generalized strongly to unseen data drawn from the same historical distribution, but their performance declined sharply on the separately constructed synthetic distribution.
 
 ### 11.4 Baseline Serialization Limitation
@@ -573,6 +577,10 @@ The ordering also reversed:
 - baseline synthetic detection: 55.40%;
 - DistilBERT synthetic detection: 36.20%.
 
+![Figure 2. Historical final-test recall compared with detection rate on the controlled synthetic phishing-class distribution.](../results/figures/figure_2_historical_vs_synthetic.png)
+
+**Figure 2. Historical generalization versus controlled synthetic detection.** Both models retain very high recall on the historical final test but decline substantially on the frozen positive-only synthetic set. Because the synthetic set contains only phishing-class examples, the plotted synthetic quantity is detection rate/recall rather than full classification accuracy.
+
 ### 13.2 Results by Category
 
 | Category | Baseline | DistilBERT |
@@ -586,6 +594,10 @@ The ordering also reversed:
 Both models performed best on account/security-style messages.
 
 Both performed poorly on routine workplace/business and general social-engineering language.
+
+![Figure 3. Synthetic detection rate by communication style for both models.](../results/figures/figure_3_synthetic_detection_by_category.png)
+
+**Figure 3. Synthetic detection rate by communication style.** Detection varied substantially across the five designed communication categories, with account/security messages detected most frequently and workplace/business and general social-engineering messages detected least frequently. These category differences are descriptive for this controlled dataset and should not be generalized to all AI-generated phishing.
 
 ### 13.3 Results by Generator
 
@@ -616,6 +628,10 @@ This means the baseline uniquely detected 109 messages, while DistilBERT uniquel
 The overlap pattern shows that DistilBERT was not completely redundant with the baseline, but the baseline had a much larger unique-detection advantage on this particular synthetic set.
 
 The frozen evaluation set was not used to tune an ensemble because doing so would turn the evaluation data into development data.
+
+![Figure 4. Paired prediction overlap between the baseline and DistilBERT on the 500 controlled synthetic messages.](../results/figures/figure_4_synthetic_prediction_overlap.png)
+
+**Figure 4. Paired model outcomes on the controlled synthetic set.** The largest paired group was messages missed by both models, followed by messages detected by both. The baseline uniquely detected substantially more messages than DistilBERT on this specific frozen set.
 
 ---
 
@@ -715,6 +731,10 @@ Among those misses:
 - median miss confidence was 99.92%.
 
 DistilBERT therefore did not simply become uncertain under distribution shift. It was often extremely confident in incorrect legitimate classifications.
+
+![Figure 5. Confidence behavior among synthetic misses.](../results/figures/figure_5_synthetic_miss_confidence.png)
+
+**Figure 5. Confidence behavior among synthetic misses.** DistilBERT produced a much larger share of high-confidence misses and a substantially higher median confidence among missed synthetic messages. These confidence values are raw model outputs and are not calibrated probabilities of real-world correctness.
 
 ### 16.4 High-Confidence Misses by Category
 
